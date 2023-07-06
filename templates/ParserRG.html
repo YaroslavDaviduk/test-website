@@ -1,0 +1,251 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 1000px;
+                 height: 1000px;
+                 background-color: #333333;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+             #config {
+                 float: left;
+                 width: 400px;
+                 height: 600px;
+             }
+             
+
+             
+             /* position absolute is important and the container has to be relative or absolute as well. */
+          div.popup {
+                 position:absolute;
+                 top:0px;
+                 left:0px;
+                 display:none;
+                 background-color:#f5f4ed;
+                 -moz-border-radius: 3px;
+                 -webkit-border-radius: 3px;
+                 border-radius: 3px;
+                 border: 1px solid #808074;
+                 box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
+          }
+
+          /* hide the original tooltip */
+          .vis-tooltip {
+            display:none;
+          }
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+            <div id="config"></div>
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#f54fa6", "font": {"color": "white"}, "id": 1, "label": "Medicine", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Medicine\u003ehttps://www.researchgate.net/topic/Medicine\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 2, "label": "Allied Health Science", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Allied-Health-Science\u003ehttps://www.researchgate.net/topic/Allied-Health-Science\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 3, "label": "Allied Health Personnel", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Allied-Health-Personnel\u003ehttps://www.researchgate.net/topic/Allied-Health-Personnel\u003c/a\u003e"}, {"color": "#f54fa6", "font": {"color": "white"}, "id": 4, "label": "Psychology", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Psychology\u003ehttps://www.researchgate.net/topic/Psychology\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 5, "label": "Clinical Psychology", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Clinical-Psychology\u003ehttps://www.researchgate.net/topic/Clinical-Psychology\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 6, "label": "Mental Illness", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Mental-Illness\u003ehttps://www.researchgate.net/topic/Mental-Illness\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 7, "label": "Anxiety Disorders", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Anxiety-Disorders\u003ehttps://www.researchgate.net/topic/Anxiety-Disorders\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 8, "label": "Anti-Anxiety Agents", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Anti-Anxiety-Agents\u003ehttps://www.researchgate.net/topic/Anti-Anxiety-Agents\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 9, "label": "Disease", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Disease\u003ehttps://www.researchgate.net/topic/Disease\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 10, "label": "Endocrine System Diseases", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Endocrine-System-Diseases\u003ehttps://www.researchgate.net/topic/Endocrine-System-Diseases\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 11, "label": "Adrenal Gland Diseases", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Adrenal-Gland-Diseases\u003ehttps://www.researchgate.net/topic/Adrenal-Gland-Diseases\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 12, "label": "Adrenal Insufficiency", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Adrenal-Insufficiency\u003ehttps://www.researchgate.net/topic/Adrenal-Insufficiency\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 13, "label": "Internal Medicine", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Internal-Medicine\u003ehttps://www.researchgate.net/topic/Internal-Medicine\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 14, "label": "Pulmonary Medicine", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Pulmonary-Medicine\u003ehttps://www.researchgate.net/topic/Pulmonary-Medicine\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 15, "label": "Respiratory tract diseases", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Respiratory-tract-diseases\u003ehttps://www.researchgate.net/topic/Respiratory-tract-diseases\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 16, "label": "Respiratory Tract Infections", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Respiratory-Tract-Infections\u003ehttps://www.researchgate.net/topic/Respiratory-Tract-Infections\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 17, "label": "ARDS", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/ARDS\u003ehttps://www.researchgate.net/topic/ARDS\u003c/a\u003e"}, {"color": "#f54fa6", "font": {"color": "white"}, "id": 18, "label": "Geoscience", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Geoscience\u003ehttps://www.researchgate.net/topic/Geoscience\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 19, "label": "Paleontology", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Paleontology\u003ehttps://www.researchgate.net/topic/Paleontology\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 20, "label": "Fossils", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Fossils\u003ehttps://www.researchgate.net/topic/Fossils\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 21, "label": "Ammonoidea", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Ammonoidea\u003ehttps://www.researchgate.net/topic/Ammonoidea\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 22, "label": "Ammonoids", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Ammonoids\u003ehttps://www.researchgate.net/topic/Ammonoids\u003c/a\u003e"}, {"color": "#f54fa6", "font": {"color": "white"}, "id": 23, "label": "Antimalarial", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Antimalarial\u003ehttps://www.researchgate.net/topic/Antimalarial\u003c/a\u003e"}, {"color": "#f54fa6", "font": {"color": "white"}, "id": 24, "label": "Computer Science", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Computer-Science\u003ehttps://www.researchgate.net/topic/Computer-Science\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 25, "label": "Computer Security and Reliability", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Computer-Security-and-Reliability\u003ehttps://www.researchgate.net/topic/Computer-Security-and-Reliability\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 26, "label": "Security Measures", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Security-Measures\u003ehttps://www.researchgate.net/topic/Security-Measures\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 27, "label": "Authentication", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Authentication\u003ehttps://www.researchgate.net/topic/Authentication\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 28, "label": "Anonyms and Pseudonyms", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Anonyms-and-Pseudonyms\u003ehttps://www.researchgate.net/topic/Anonyms-and-Pseudonyms\u003c/a\u003e"}, {"color": "#f54fa6", "font": {"color": "white"}, "id": 29, "label": "Biological Science", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Biological-Science\u003ehttps://www.researchgate.net/topic/Biological-Science\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 30, "label": "Biota", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Biota\u003ehttps://www.researchgate.net/topic/Biota\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 31, "label": "Eukaryota", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Eukaryota\u003ehttps://www.researchgate.net/topic/Eukaryota\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 32, "label": "Viridiplantae", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Viridiplantae\u003ehttps://www.researchgate.net/topic/Viridiplantae\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 33, "label": "Streptophyta", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Streptophyta\u003ehttps://www.researchgate.net/topic/Streptophyta\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 34, "label": "Plants", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Plants\u003ehttps://www.researchgate.net/topic/Plants\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 35, "label": "Angiosperms", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Angiosperms\u003ehttps://www.researchgate.net/topic/Angiosperms\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 36, "label": "Meliaceae", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Meliaceae\u003ehttps://www.researchgate.net/topic/Meliaceae\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 37, "label": "Aglaia", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Aglaia\u003ehttps://www.researchgate.net/topic/Aglaia\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 38, "label": "Faunistics", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Faunistics\u003ehttps://www.researchgate.net/topic/Faunistics\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 39, "label": "Animal Science", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Animal-Science2\u003ehttps://www.researchgate.net/topic/Animal-Science2\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 40, "label": "Animal Nutrition Sciences", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Animal-Nutrition-Sciences\u003ehttps://www.researchgate.net/topic/Animal-Nutrition-Sciences\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 41, "label": "Disease Models", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Disease-Models\u003ehttps://www.researchgate.net/topic/Disease-Models\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 42, "label": "Animal Disease Models", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Animal-Disease-Models\u003ehttps://www.researchgate.net/topic/Animal-Disease-Models\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 43, "label": "Oceania", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Oceania\u003ehttps://www.researchgate.net/topic/Oceania\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 44, "label": "Australasia", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Australasia\u003ehttps://www.researchgate.net/topic/Australasia\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 45, "label": "Marine Biology", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Marine-Biology\u003ehttps://www.researchgate.net/topic/Marine-Biology\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 46, "label": "Antifouling", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Antifouling\u003ehttps://www.researchgate.net/topic/Antifouling\u003c/a\u003e"}, {"color": "#f54fa6", "font": {"color": "white"}, "id": 47, "label": "Engineering", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Engineering\u003ehttps://www.researchgate.net/topic/Engineering\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 48, "label": "Civil Engineering", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Civil-Engineering\u003ehttps://www.researchgate.net/topic/Civil-Engineering\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 49, "label": "Transportation Engineering", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Transportation-Engineering\u003ehttps://www.researchgate.net/topic/Transportation-Engineering\u003c/a\u003e"}, {"color": "#6cf8e1", "font": {"color": "white"}, "id": 50, "label": "Transportation", "shape": "dot", "title": "\n\u003ca href=https://www.researchgate.net/topic/Transportation\u003ehttps://www.researchgate.net/topic/Transportation\u003c/a\u003e"}]);
+                  edges = new vis.DataSet([{"from": 2, "to": 1, "value": 674}, {"from": 3, "to": 2, "value": 10000}, {"from": 5, "to": 4, "value": 207673}, {"from": 6, "to": 5, "value": 513527}, {"from": 7, "to": 6, "value": 146949}, {"from": 8, "to": 7, "value": 23025}, {"from": 9, "to": 1, "value": 355819}, {"from": 10, "to": 9, "value": 13036}, {"from": 11, "to": 10, "value": 11544}, {"from": 12, "to": 11, "value": 12966}, {"from": 13, "to": 1, "value": 87458}, {"from": 14, "to": 13, "value": 76809}, {"from": 15, "to": 14, "value": 0}, {"from": 16, "to": 15, "value": 34339}, {"from": 17, "to": 16, "value": 54129}, {"from": 19, "to": 18, "value": 127588}, {"from": 20, "to": 19, "value": 214124}, {"from": 21, "to": 20, "value": 11344}, {"from": 22, "to": 21, "value": 3423}, {"from": 25, "to": 24, "value": 836}, {"from": 26, "to": 25, "value": 33667}, {"from": 27, "to": 26, "value": 244844}, {"from": 28, "to": 27, "value": 8629}, {"from": 30, "to": 29, "value": 31615}, {"from": 31, "to": 30, "value": 66831}, {"from": 32, "to": 31, "value": 0}, {"from": 33, "to": 32, "value": 0}, {"from": 34, "to": 33, "value": 371886}, {"from": 35, "to": 34, "value": 61122}, {"from": 36, "to": 35, "value": 8614}, {"from": 37, "to": 36, "value": 649}, {"from": 38, "to": 29, "value": 9177}, {"from": 39, "to": 38, "value": 134821}, {"from": 40, "to": 39, "value": 272}, {"from": 41, "to": 9, "value": 10000}, {"from": 42, "to": 41, "value": 72460}, {"from": 43, "to": 18, "value": 10520}, {"from": 44, "to": 43, "value": 7702}, {"from": 45, "to": 29, "value": 154066}, {"from": 46, "to": 45, "value": 10000}, {"from": 48, "to": 47, "value": 202405}, {"from": 49, "to": 48, "value": 4543}, {"from": 50, "to": 49, "value": 309621}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": true,
+        "filter": [
+            "physics"
+        ]
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+                  // if this network requires displaying the configure window,
+                  // put it in its div
+                  options.configure["container"] = document.getElementById("config");
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+                  // make a custom popup
+                      var popup = document.createElement("div");
+                      popup.className = 'popup';
+                      popupTimeout = null;
+                      popup.addEventListener('mouseover', function () {
+                          console.log(popup)
+                          if (popupTimeout !== null) {
+                              clearTimeout(popupTimeout);
+                              popupTimeout = null;
+                          }
+                      });
+                      popup.addEventListener('mouseout', function () {
+                          if (popupTimeout === null) {
+                              hidePopup();
+                          }
+                      });
+                      container.appendChild(popup);
+
+
+                      // use the popup event to show
+                      network.on("showPopup", function (params) {
+                          showPopup(params);
+                      });
+
+                      // use the hide event to hide it
+                      network.on("hidePopup", function (params) {
+                          hidePopup();
+                      });
+
+                      // hiding the popup through css
+                      function hidePopup() {
+                          popupTimeout = setTimeout(function () { popup.style.display = 'none'; }, 500);
+                      }
+
+                      // showing the popup
+                      function showPopup(nodeId) {
+                          // get the data from the vis.DataSet
+                          var nodeData = nodes.get([nodeId]);
+                          popup.innerHTML = nodeData[0].title;
+
+                          // get the position of the node
+                          var posCanvas = network.getPositions([nodeId])[nodeId];
+
+                          // get the bounding box of the node
+                          var boundingBox = network.getBoundingBox(nodeId);
+
+                          //position tooltip:
+                          posCanvas.x = posCanvas.x + 0.5 * (boundingBox.right - boundingBox.left);
+
+                          // convert coordinates to the DOM space
+                          var posDOM = network.canvasToDOM(posCanvas);
+
+                          // Give it an offset
+                          posDOM.x += 10;
+                          posDOM.y -= 20;
+
+                          // show and place the tooltip.
+                          popup.style.display = 'block';
+                          popup.style.top = posDOM.y + 'px';
+                          popup.style.left = posDOM.x + 'px';
+                      }
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>
